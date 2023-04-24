@@ -228,27 +228,10 @@ export class Mastodon extends Website {
         };
       }
 
-      // Tags only should be posted on public entries - they can not be searched on other types
-      if (options.visibility == 'public') {
-
-        // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
-        // these onto the post, *IF* there is character count available.
-
-        if (data.tags.length > 0) {
-          form.status += "\n\n";
-        }
-
-        data.tags.forEach(tag => {
-          let remain = maxChars - form.status.length;
-          let tagToInsert = tag;
-          if (!tag.startsWith('#')) {
-            tagToInsert = `#${tagToInsert}`
-          }
-          if (remain > (tagToInsert.length)) {
-            form.status += ` ${tagToInsert}`
-          }
-          // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-        })
+      // Update the post content with the Tags if any are specified - for Mastodon, we need to append 
+      // these onto the post, *IF* there is character count available.
+      if (data.tags.length > 0) {
+        form.status += "\n\n";
       }
 
       data.tags.forEach(tag => {
