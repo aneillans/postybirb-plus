@@ -81,7 +81,7 @@ export class Pixelfed extends Website {
   private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {
     const M = new PixelfedInstance({
       access_token: data.token,
-      api_url: `${data.website}/api/v2/`,
+      api_url: `${data.website}/api/v1/`,
     });
 
     const instance = await M.get('instance');
@@ -215,6 +215,7 @@ export class Pixelfed extends Website {
         };
       }
 
+      this.logger.debug(`Instance Max Chars ${maxChars}`)
       this.logger.debug(`Number of tags set ${data.tags.length}`);
 
       // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
@@ -238,6 +239,8 @@ export class Pixelfed extends Website {
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
       }
+
+      console.log(form.status);
 
       const post = await M.post('statuses', form);
       lastId = post.data.id;
