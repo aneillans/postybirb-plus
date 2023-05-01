@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 import { PixelfedAccountData } from 'postybirb-commons';
 import LoginService from '../../services/login.service';
 import { LoginDialogProps } from '../interfaces/website.interface';
+import { stringify } from 'querystring';
 
 interface State extends PixelfedAccountData {
   code: string;
@@ -38,14 +39,28 @@ export default class PixelfedLogin extends React.Component<LoginDialogProps, Sta
       view.addEventListener('did-stop-loading', () => {
         if (this.state.loading) this.setState({ loading: false });
       });
-      view.allowpopups = true;
+      // view.addEventListener('did-start-navigation', (url, isInPlace, isMainFrame, frameProcessId, frameRoutingId) => {
+      // });
+
+      view.addEventListener('did-redirect-navigation', (url, isInPlace, isMainframe, frameProcessId, frameRoutingId) => {
+        if (url.url.includes("urn:ietf:wg:oauth:2.0:oob")) {
+          // We have a token ! 
+          this.setState({ code: url.url.replace("urn:ietf:wg:oauth:2.0:oob?code=", "") });
+        }
+      });
+      
+      view.addEventListener('will-redirect', (event, url, isInPlace, isMainFrame, frameProcessId, frameRoutingId) => {
+        console.log(url);
+      });
+      
+      view.allowpopups = false;
       view.partition = `persist:${this.props.account._id}`;
       view.src = this.getAuthURL();
     }
   }
 
   private getAuthURL(website?: string): string {
-    return `${window.AUTH_SERVER_URL}/Pixelfed/v2/authorize?website=${encodeURIComponent(
+    return `${window.AUTH_SERVER_URL}/Mastodon/v2/authorize?website=${encodeURIComponent(
       this.getWebsiteURL(website)
     )}`;
   }
@@ -57,7 +72,7 @@ export default class PixelfedLogin extends React.Component<LoginDialogProps, Sta
   submit() {
     const website = this.getWebsiteURL();
     Axios.post<{ success: boolean; error: string; data: { token: string; username: string } }>(
-      `${window.AUTH_SERVER_URL}/Pixelfed/v2/authorize/`,
+      `${window.AUTH_SERVER_URL}/Mastodon/v2/authorize/`,
       {
         website,
         code: this.state.code

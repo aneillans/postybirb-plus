@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import * as MastodonInstance from 'mastodon-api';
+import * as PixelfedInstance from 'mastodon-api';
 import {
   DefaultOptions,
   FileRecord,
   FileSubmission,
   FileSubmissionType,
   PixelfedAccountData,
-  PixelfedFileOptions,  
+  PixelfedFileOptions,
   PostResponse,
   Submission,
   SubmissionPart,
@@ -62,10 +62,6 @@ export class Pixelfed extends Website {
     'swf',
     'flv',
     'mp4',
-    'doc',
-    'rtf',
-    'txt',
-    'mp3',
   ];
 
   async checkLoginStatus(data: UserAccountEntity): Promise<LoginResponse> {
@@ -83,7 +79,7 @@ export class Pixelfed extends Website {
   }
 
   private async getInstanceInfo(profileId: string, data: PixelfedAccountData) {
-    const M = new MastodonInstance({
+    const M = new PixelfedInstance({
       access_token: data.token,
       api_url: `${data.website}/api/v2/`,
     });
@@ -100,7 +96,7 @@ export class Pixelfed extends Website {
   }
 
   private getPixelfedInstance(data: PixelfedAccountData) {
-    return new MastodonInstance({
+    return new PixelfedInstance({
       access_token: data.token,
       api_url: `${data.website}/api/v1/`,
     });
@@ -135,7 +131,7 @@ export class Pixelfed extends Website {
         requestOptions: { json: true },
         headers: {
           Accept: '*/*',
-          'User-Agent': 'node-Pixelfed-client/PostyBirb',
+          'User-Agent': 'node-mastodon-client/PostyBirb',
           Authorization: `Bearer ${data.token}`,
         },
       },
@@ -154,7 +150,7 @@ export class Pixelfed extends Website {
             requestOptions: { json: true },
             headers: {
               Accept: '*/*',
-              'User-Agent': 'node-Pixelfed-client/PostyBirb',
+              'User-Agent': 'node-mastodon-client/PostyBirb',
               Authorization: `Bearer ${data.token}`,
             },
           },
@@ -219,28 +215,25 @@ export class Pixelfed extends Website {
         };
       }
 
-      // Tags only should be posted on public entries - they can not be searched on other types
-      if (options.visibility == 'public') {
+      this.logger.debug(`Number of tags set ${data.tags.length}`);
 
-        // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
-        // these onto the post, *IF* there is character count available.
-
-        if (data.tags.length > 0) {
-          form.status += "\n\n";
-        }
-
-        data.tags.forEach(tag => {
-          let remain = maxChars - form.status.length;
-          let tagToInsert = tag;
-          if (!tag.startsWith('#')) {
-            tagToInsert = `#${tagToInsert}`
-          }
-          if (remain > (tagToInsert.length)) {
-            form.status += ` ${tagToInsert}`
-          }
-          // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
-        })
+      // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
+      // these onto the post, *IF* there is character count available.
+      if (data.tags.length > 0) {
+        form.status += "\n\n";
       }
+
+      data.tags.forEach(tag => {
+        let remain = maxChars - form.status.length;
+        let tagToInsert = tag;
+        if (!tag.startsWith('#')) {
+          tagToInsert = `#${tagToInsert}`
+        }
+        if (remain > (tagToInsert.length)) {
+          form.status += ` ${tagToInsert}`
+        }
+        // We don't exit the loop, so we can cram in every possible tag, even if there are short ones!
+      })
       
       if (options.spoilerText) {
         form.spoiler_text = options.spoilerText;
@@ -318,11 +311,11 @@ export class Pixelfed extends Website {
     if ((submissionPart.data.tags.value.length > 1 || defaultPart.data.tags.value.length > 1) && 
       submissionPart.data.visibility != "public") {
         warnings.push(
-              `Tags will not be usable on a post which is not set to public visibility`,
+              `This post won't be listed under any hashtag as it is not public. Only public posts 
+              can be searched by hashtag.`,
             );
     }
 
     return { problems, warnings };
   }
-
 }
