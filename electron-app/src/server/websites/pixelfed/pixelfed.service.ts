@@ -249,6 +249,10 @@ export class Pixelfed extends Website {
         return Promise.reject(
           this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
         );
+      } else {
+        return this.createPostResponse({
+          source: `${post.data.url}`
+        });
       }
     }
 
