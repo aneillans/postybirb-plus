@@ -1,6 +1,6 @@
 # PostyFox
 
-**PostyFox is a fork of [PostyBirb+](https://github.com/mvdicarlo/postybirb-plus) developed by Lemonynade. The idea of this fork is to add features that I'm working on and provide test builds quickly. It will, at times, have features that are not in PostyBirb+ and may in the future deviate.
+PostyFox is a fork of [PostyBirb+](https://github.com/mvdicarlo/postybirb-plus) developed by Lemonynade. The idea of this fork is to add features that I'm working on and provide test builds quickly. It will, at times, have features that are not in PostyBirb+ and may in the future deviate.
 
 Core technologies used in the application are TypeScript, NestJS, React and Electron.
 
