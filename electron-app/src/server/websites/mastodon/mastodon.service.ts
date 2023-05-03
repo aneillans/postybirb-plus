@@ -123,7 +123,11 @@ export class Mastodon extends Website {
               ? instanceInfo.configuration.media_attachments.image_size_limit
               : instanceInfo.configuration.media_attachments.video_size_limit,
         }
-      : { maxSize: FileSize.MBtoBytes(300) };
+      : {           
+          maxHeight: 4000,
+          maxWidth: 4000,
+          maxSize: FileSize.MBtoBytes(300) 
+      };
   }
 
   private async uploadMedia(
@@ -258,9 +262,7 @@ export class Mastodon extends Website {
           this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
         );
       } else {
-        return this.createPostResponse({
-          source: `${post.data.url}`
-        });
+        return this.createPostResponse({ source: post.data.url });
       }
     }
 
