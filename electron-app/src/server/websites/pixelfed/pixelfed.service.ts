@@ -215,7 +215,6 @@ export class Pixelfed extends Website {
         };
       }
 
-      this.logger.debug(`Instance Max Chars ${maxChars}`)
       this.logger.debug(`Number of tags set ${data.tags.length}`);
 
       // Update the post content with the Tags if any are specified - for Pixelfed, we need to append 
@@ -240,8 +239,6 @@ export class Pixelfed extends Website {
         form.spoiler_text = options.spoilerText;
       }
 
-      console.log(form.status);
-
       const post = await M.post('statuses', form);
       lastId = post.data.id;
 
@@ -249,10 +246,6 @@ export class Pixelfed extends Website {
         return Promise.reject(
           this.createPostResponse({ message: post.data.error, additionalInfo: post.data }),
         );
-      } else {
-        return this.createPostResponse({
-          source: `${post.data.url}`
-        });
       }
     }
 
