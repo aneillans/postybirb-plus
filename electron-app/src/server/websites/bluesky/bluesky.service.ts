@@ -136,7 +136,7 @@ function getRichTextLength(text: string): number {
 @Injectable()
 export class Bluesky extends Website {
   readonly BASE_URL = '';
-  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif'];
+  readonly acceptsFiles = ['png', 'jpeg', 'jpg', 'gif', 'webm', 'mp4', 'mpeg', 'mov'];
   readonly acceptsAdditionalFiles = true;
   readonly refreshInterval = 45 * 60000;
   readonly defaultDescriptionParser = PlaintextParser.parse;
@@ -406,10 +406,21 @@ export class Bluesky extends Website {
 
     this.validateDescription(problems, warnings, submissionPart, defaultPart);
 
+    let hasVideo = false;
+
     files.forEach(file => {
       const { type, size, name, mimetype } = file;
       if (!WebsiteValidator.supportsFileType(file, this.acceptsFiles)) {
         problems.push(`Does not support file format: (${name}) ${mimetype}.`);
+      }
+
+      if (type === FileSubmissionType.VIDEO && !hasVideo) {
+        hasVideo = true;
+        if (files.length > 1) {
+          problems.push(
+            'A video can only be posted on its own with no other images (or other videos)',
+          );
+        }
       }
 
       let maxMB: number = 1;
@@ -421,7 +432,9 @@ export class Bluesky extends Website {
         ) {
           warnings.push(`${name} will be scaled down to ${maxMB}MB`);
         } else {
-          problems.push(`BlueSky limits ${mimetype} to ${maxMB}MB`);
+          if (type != FileSubmissionType.VIDEO) {
+            problems.push(`BlueSky limits ${mimetype} to ${maxMB}MB`);
+          }
         }
       }
 
